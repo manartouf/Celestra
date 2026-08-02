@@ -195,3 +195,21 @@ celestra-lang/
     ├── calculator.cel             <- input() driven calculator
     └── arrays_and_builtins.cel      <- arrays, +=, and the built-in library
 ```
+---
+
+## 5. Example programs
+
+| File | Demonstrates |
+|---|---|
+| `examples/hello.cel` | The minimal "Hello, World!" program |
+| `examples/variables.cel` | Variable declaration/reassignment, all arithmetic and logical operators, string concatenation |
+| `examples/control_flow.cel` | `if`/`else`, `while`, `for`, FizzBuzz, `break`/`continue` |
+| `examples/functions.cel` | `def`/`return`, recursion (recursive `factorial`), multiple parameters |
+| `examples/calculator.cel` | `input()` runtime input with automatic number/string coercion |
+| `examples/arrays_and_builtins.cel` | Arrays, `+=`/`-=`/`*=`/`/=`, and the full built-in library (`length`, `push`, `pop`, `set`, `upper`, `lower`, `sqrt`, `pow`, `abs`, `round`, `random`, `typeof`) |
+
+Run any of them with:
+```bash
+cd src
+./celestra ../examples/<name>.cel
+```
