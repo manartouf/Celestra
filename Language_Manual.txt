@@ -1,0 +1,328 @@
+================================================================================
+ ZEPHYR LANGUAGE MANUAL
+ File extension: .cel
+================================================================================
+
+--------------------------------------------------------------------------------
+1. DEPENDENCIES
+--------------------------------------------------------------------------------
+You need a Linux/macOS/WSL environment with:
+  - gcc (or any C compiler)
+  - flex   (>= 2.6)
+  - bison  (>= 3.0)
+  - make
+
+On Ubuntu/Debian:
+    sudo apt-get update
+    sudo apt-get install -y flex bison gcc make
+
+--------------------------------------------------------------------------------
+2. HOW TO COMPILE
+--------------------------------------------------------------------------------
+From the repository root:
+
+    cd src
+    make
+
+This runs, in order:
+    bison -d -o parser.tab.c parser.y     # generates the parser + parser.tab.h
+    flex  -o lex.yy.c lexer.l             # generates the lexer
+    gcc   ... -o celestra  parser.tab.c lex.yy.c ast.c interpreter.c -lm -lfl
+
+The result is a single executable, `src/celestra`.
+
+To remove generated files:
+    make clean
+
+--------------------------------------------------------------------------------
+3. HOW TO RUN A PROGRAM
+--------------------------------------------------------------------------------
+    ./celestra path/to/program.cel
+
+Example:
+    cd src
+    ./celestra ../examples/hello.cel
+    ./celestra ../examples/control_flow.cel
+    ./celestra ../examples/functions.cel
+    ./celestra ../examples/calculator.cel     # this one reads input() calls,
+                                             # so type values when prompted
+
+--------------------------------------------------------------------------------
+4. SYNTAX GUIDE
+--------------------------------------------------------------------------------
+
+4.1  Comments
+--------------
+    # this is a comment, runs to end of line
+
+4.2  Statements & semicolons
+------------------------------
+Every "simple" statement (let, assignment, print, input, return, break,
+continue, and bare expressions) ends with a semicolon `;`.
+Compound statements (if, while, for, def, and bare `{ }` blocks) do NOT
+take a trailing semicolon after their closing brace.
+
+4.3  Data types
+-----------------
+Celestra is dynamically typed. There are 5 kinds of value:
+    - number   e.g. 42, 3.14, -7          (stored internally as double)
+    - string   e.g. "hello", "line\n"     (double-quoted, supports \n \t \" \\)
+    - boolean  true / false
+    - array    e.g. [1, 2, 3], [], ["a", "b"]   (see section 4.5a)
+    - none     the value produced by a function with no `return`
+
+Use typeof(x) at any time to check a value's type as a string, e.g.
+typeof(5) -> "number", typeof([1,2]) -> "array".
+
+4.4  Variables
+----------------
+Declare with `let`, then reassign freely (no `let` needed on reassignment):
+
+    let x = 10;
+    x = x + 1;
+    let name = "Ada";
+
+Variables are lexically scoped to the nearest enclosing `{ }` block (this
+includes if/while/for bodies and function bodies). A variable declared
+inside a block disappears once that block ends.
+
+NOTE: assigning to a name that was never `let`-declared is a runtime
+error ("assignment to undeclared variable") -- this is intentional, to
+catch typos.
+
+4.5  Operators
+----------------
+  Arithmetic:    +   -   *   /   %
+  Comparison:    >   <   >=   <=   ==   !=
+  Logical:       and   or   not
+  Unary minus:   -x
+  Compound assignment:  +=   -=   *=   /=      (x += 1  is short for  x = x + 1)
+
+  `+` also performs string concatenation if either side is a string:
+      "Score: " + 5      -->  "Score: 5"
+
+  Comparisons `==` / `!=` work between any two values (different types
+  compare as not-equal). `>` `<` `>=` `<=` work between two numbers or
+  between two strings (lexicographic).
+
+  Standard precedence (highest to lowest):
+      unary minus / not
+      *  /  %
+      +  -
+      >  <  >=  <=  ==  !=
+      and
+      or
+
+4.5a  Arrays
+--------------
+Arrays hold an ordered list of values (which can be any type, even mixed):
+
+    let nums = [10, 20, 30];
+    let empty = [];
+    let mixed = [1, "two", true];
+
+Read an element with square brackets (0-indexed):
+
+    print(nums[0]);      # 10
+
+Strings can be indexed the same way to get a single character:
+
+    let word = "Hi";
+    print(word[0]);      # "H"
+
+Arrays are REFERENCE types: assigning an array to another variable, or
+passing it into a function, shares the same underlying data rather than
+copying it -- exactly like lists in Python or JavaScript.
+
+    let a = [1, 2];
+    let b = a;
+    push(b, 3);
+    print(a);            # [1, 2, 3]  <- a changed too, since a and b
+                          #              refer to the same array
+
+Since Celestra's grammar treats `arr[i]` purely as a value you can read
+(to avoid a grammar ambiguity -- see README.md for why), arrays are
+modified through built-in functions instead of `arr[i] = ...`:
+
+    length(x)        -> number of elements in an array, or characters
+                         in a string
+    push(arr, value)  -> appends `value` to the end of `arr` (mutates it)
+    pop(arr)           -> removes and returns the last element of `arr`
+    set(arr, i, value)  -> replaces the element at index `i` (mutates it)
+
+Example:
+
+    let scores = [70, 85];
+    push(scores, 90);          # scores is now [70, 85, 90]
+    set(scores, 0, 75);        # scores is now [75, 85, 90]
+    let removed = pop(scores); # removed = 90, scores is [75, 85]
+
+4.5b  Other built-in functions
+---------------------------------
+    upper(s)        -> uppercase copy of string s
+    lower(s)         -> lowercase copy of string s
+    sqrt(n)            -> square root of n
+    pow(a, b)           -> a raised to the power b
+    abs(n)               -> absolute value of n
+    round(n)              -> n rounded to the nearest whole number
+    random()               -> a random number in the range [0, 1)
+    typeof(x)               -> the type of x, as a string:
+                               "number" | "string" | "boolean" |
+                               "array" | "none"
+
+4.6  Printing
+---------------
+    print(expr1, expr2, ..., exprN);
+
+Prints each argument separated by a single space, followed by a newline.
+Values are auto-converted to a readable string form (whole numbers print
+without a trailing ".0").
+
+    print("x =", x, "and y =", y);
+
+4.7  Input
+------------
+    input(varName);
+
+Reads one line of text from standard input, and stores it into `varName`.
+If the whole line parses as a number, it is stored as a number;
+otherwise it is stored as a string. `varName` does not need a prior
+`let` -- `input(...)` declares/overwrites it in the current scope.
+
+    print("What is your name?");
+    input(name);
+    print("Hi, " + name);
+
+4.8  Conditionals
+-------------------
+    if (condition) {
+        ...
+    } else {
+        ...
+    }
+
+The `else` branch is optional. Braces are always required (Celestra has no
+single-statement-without-braces form).
+
+4.9  Loops
+------------
+While loop:
+    while (condition) {
+        ...
+    }
+
+C-style for loop:
+    for (let i = 0; i < 10; i = i + 1) {
+        ...
+    }
+
+The for-loop header is exactly three parts separated by `;`:
+    1. init      -- `let x = ...` or `x = ...`
+    2. condition -- any boolean expression
+    3. update    -- `x = ...`   (no trailing semicolon on the update)
+
+`break;`    exits the nearest enclosing loop immediately.
+`continue;` skips to the next iteration of the nearest enclosing loop.
+
+4.10  Functions
+-----------------
+    def functionName(param1, param2) {
+        ...
+        return expr;     # optional -- omit for a function with no result
+    }
+
+    functionName(arg1, arg2);      # call as a statement
+    let r = functionName(arg1, arg2);   # or use the return value in an expr
+
+Functions may call themselves (recursion) and may be defined in any
+order at the top level -- all top-level `def`s are registered before the
+program starts running. Function parameters are local to that call;
+functions can read/write their own parameters and locals, and can read
+(but not silently create) global variables declared with `let` at the
+top level using ordinary assignment, since function scope's parent is
+the global scope.
+
+4.11  Full grammar summary (informal)
+----------------------------------------
+    program    -> stmt*
+    stmt       -> simple_stmt ';'
+                | if_stmt | while_stmt | for_stmt | func_def | block
+
+    simple_stmt-> let_stmt | assign_stmt | print_stmt | input_stmt
+                | return_stmt | break_stmt | continue_stmt | expr
+
+    let_stmt   -> 'let' IDENT '=' expr
+    print_stmt -> 'print' '(' (expr (',' expr)*)? ')'
+    input_stmt -> 'input' '(' IDENT ')'
+    return_stmt-> 'return' expr?
+    if_stmt    -> 'if' '(' expr ')' block ('else' block)?
+    while_stmt -> 'while' '(' expr ')' block
+    for_stmt   -> 'for' '(' for_init ';' expr ';' for_update ')' block
+    func_def   -> 'def' IDENT '(' (IDENT (',' IDENT)*)? ')' block
+    block      -> '{' stmt* '}'
+
+    expr       -> NUMBER | STRING | 'true' | 'false' | IDENT
+                | IDENT '(' (expr (',' expr)*)? ')'
+                | '(' expr ')' | '-' expr | 'not' expr
+                | '[' (expr (',' expr)*)? ']'          (array literal)
+                | expr '[' expr ']'                     (indexing)
+                | expr ('+'|'-'|'*'|'/'|'%') expr
+                | expr ('>'|'<'|'>='|'<='|'=='|'!=') expr
+                | expr ('and'|'or') expr
+
+    assign_stmt-> IDENT ('='|'+='|'-='|'*='|'/=') expr
+
+--------------------------------------------------------------------------------
+5. WORKED EXAMPLE
+--------------------------------------------------------------------------------
+    # average.cel
+    def average(a, b) {
+        return (a + b) / 2;
+    }
+
+    print("Enter two numbers:");
+    input(x);
+    input(y);
+
+    let avg = average(x, y);
+    if (avg >= 50) {
+        print("Average", avg, "is high.");
+    } else {
+        print("Average", avg, "is low.");
+    }
+
+Run it with:
+    ./celestra average.cel
+
+A second example using arrays and built-ins:
+
+    # top_score.cel
+    let scores = [];
+    for (let i = 0; i < 3; i += 1) {
+        print("Enter score", i + 1, ":");
+        input(s);
+        push(scores, s);
+    }
+
+    let best = scores[0];
+    for (let i = 1; i < length(scores); i += 1) {
+        if (scores[i] > best) {
+            best = scores[i];
+        }
+    }
+    print("Scores:", scores);
+    print("Highest score:", best);
+
+--------------------------------------------------------------------------------
+6. ERROR MESSAGES
+--------------------------------------------------------------------------------
+Syntax errors are reported by Bison with the offending line number and
+token, e.g.:
+    Celestra Syntax Error (line 4): syntax error near ';'
+
+Runtime errors halt execution immediately with a description, e.g.:
+    Celestra Runtime Error: undefined variable 'zzz'
+    Celestra Runtime Error: division by zero
+    Celestra Runtime Error: assignment to undeclared variable 'y' (use 'let' first)
+
+================================================================================

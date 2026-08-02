@@ -1,0 +1,5 @@
+src/celestra
+src/parser.tab.c
+src/parser.tab.h
+src/lex.yy.c
+*.o

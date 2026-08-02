@@ -1,0 +1,44 @@
+# arrays_and_builtins.cel -- Celestra's array type and built-in library
+
+let scores = [88, 92, 79, 95, 60];
+print("scores:", scores);
+print("how many:", length(scores));
+print("first score:", scores[0]);
+print("last score:", scores[length(scores) - 1]);
+
+push(scores, 100);
+print("after adding a score:", scores);
+
+set(scores, 2, 80);
+print("after fixing scores[2]:", scores);
+
+# Build a new array by looping and pushing
+let doubled = [];
+for (let i = 0; i < length(scores); i = i + 1) {
+    push(doubled, scores[i] * 2);
+}
+print("doubled:", doubled);
+
+# Compute an average using a running total
+let total = 0;
+for (let i = 0; i < length(scores); i = i + 1) {
+    total += scores[i];
+}
+let average = total / length(scores);
+print("average score:", average);
+
+# String built-ins
+let word = "Celestra";
+print(upper(word), "/", lower(word));
+print("first letter:", word[0]);
+
+# Math built-ins
+print("sqrt(81) =", sqrt(81));
+print("pow(2, 8) =", pow(2, 8));
+print("abs(-15) =", abs(-15));
+print("round(4.4) vs round(4.6):", round(4.4), round(4.6));
+
+# typeof() for exploring dynamic typing
+print("typeof(scores):", typeof(scores));
+print("typeof(word):", typeof(word));
+print("typeof(average):", typeof(average));

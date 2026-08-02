@@ -1,0 +1,18 @@
+# calculator.cel -- reading runtime input from the user
+
+print("Enter your name:");
+input(name);
+print("Nice to meet you, " + name + "!");
+
+print("Enter the first number:");
+input(x);
+print("Enter the second number:");
+input(y);
+
+print(name + ", here are your results:");
+print("Sum:", x + y);
+print("Difference:", x - y);
+print("Product:", x * y);
+if (y != 0) {
+    print("Quotient:", x / y);
+}

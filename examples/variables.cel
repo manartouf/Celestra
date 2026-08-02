@@ -1,0 +1,24 @@
+# variables.cel -- variables, arithmetic and logical operators
+
+let a = 10;
+let b = 3;
+
+print("a =", a, " b =", b);
+print("a + b =", a + b);
+print("a - b =", a - b);
+print("a * b =", a * b);
+print("a / b =", a / b);
+print("a % b =", a % b);
+
+print("a > b:", a > b);
+print("a < b:", a < b);
+print("a == b:", a == b);
+print("a != b:", a != b);
+
+let name = "Celestra";
+let greeting = "Hello, " + name + "!";
+print(greeting);
+
+let both = (a > 5) and (b < 5);
+let either = (a > 100) or (b == 3);
+print("both:", both, " either:", either, " not both:", not both);

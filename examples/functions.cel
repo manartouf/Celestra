@@ -1,0 +1,25 @@
+# functions.cel -- user-defined functions, including recursion
+
+def square(x) {
+    return x * x;
+}
+
+def factorial(n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
+}
+
+def greet(name) {
+    print("Hello, " + name + "!");
+}
+
+def add(a, b) {
+    return a + b;
+}
+
+print("square(6) =", square(6));
+print("factorial(5) =", factorial(5));
+print("add(4, 9) =", add(4, 9));
+greet("World");

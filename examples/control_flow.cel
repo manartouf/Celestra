@@ -1,0 +1,49 @@
+# control_flow.cel -- if/else, while, for, break, continue
+
+let x = 7;
+if (x > 5) {
+    print("x is greater than 5");
+} else {
+    print("x is 5 or less");
+}
+
+print("--- while loop: countdown ---");
+let i = 3;
+while (i > 0) {
+    print(i);
+    i = i - 1;
+}
+print("Liftoff!");
+
+print("--- for loop: 1 to 5 ---");
+for (let j = 1; j <= 5; j = j + 1) {
+    print("j =", j);
+}
+
+print("--- FizzBuzz 1..15 ---");
+for (let n = 1; n <= 15; n = n + 1) {
+    if (n % 15 == 0) {
+        print("FizzBuzz");
+    } else {
+        if (n % 3 == 0) {
+            print("Fizz");
+        } else {
+            if (n % 5 == 0) {
+                print("Buzz");
+            } else {
+                print(n);
+            }
+        }
+    }
+}
+
+print("--- break / continue ---");
+for (let k = 1; k <= 10; k = k + 1) {
+    if (k == 7) {
+        break;
+    }
+    if (k % 2 == 0) {
+        continue;
+    }
+    print("odd:", k);
+}

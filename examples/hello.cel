@@ -1,0 +1,2 @@
+# hello.cel -- the classic first program in Celestra
+print("Hello, Celestra!");
