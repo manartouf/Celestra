@@ -213,3 +213,13 @@ Run any of them with:
 cd src
 ./celestra ../examples/<name>.cel
 ```
+cd ~/celestra-lang/src — go into the project's source folder
+make clean — delete the old compiled program (so the rebuild is fresh)
+make — compile the language (runs bison, flex, gcc)
+ ./celestra ../examples/arrays_and_builtins.cel — compile the language (runs bison, flex, gcc)
+ ./celestra ../examples/functions.cel — run the recursion/functions demo
+ ./celestra ../examples/calculator.cel — run the demo that takes live keyboard input
+ echo 'let x=5/0;'> ../examples/broken_test.cel — create a tiny broken test file (divide by zero)
+ ./celestra ../examples/broken_test.cel — run it to show a clean error message instead of a crash
+ rm ../examples/broken_test.cel — delete that test file afterward
+ 
